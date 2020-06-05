@@ -1,0 +1,843 @@
+/*
+
+	HITIT CMS INTEGRATION
+	FLIGHT SEARCH API
+
+*/
+
+/* FlightSearch Constructor */
+(function($, global){
+
+	if(!$){
+		console.log("jQuery is required by HITIT Flight Search API!");
+	}
+
+	var FlightSearch = function(){
+
+		/*default values*/
+
+		this.tripType = "ROUND_TRIP";
+		this.tripTypeArea = $("#tripTypeArea");
+
+		this.depPort = $("select#depPort");
+		this.depPortArea = $("#depPortArea");
+
+		this.arrPort = $("select#arrPort");
+		this.arrPortArea = $("#arrPortArea");
+
+		this.multiDepPort = $("select#multiDepPort");
+		this.multiDepPortArea = $("#multiDepPortArea");
+
+		this.multiArrPort = $("select#multiArrPort");
+		this.multiArrPortArea = $("#multiArrPortArea");
+
+		this.departureDate = $("input#departureDate");
+		this.departureDateArea = $("#departureDateArea");
+
+		this.returnDate = $("input#returnDate");
+		this.returnDateArea = $("#returnDateArea");
+
+		this.openDepartureDate = $("input#openDepartureDate");
+		this.openDepartureDateArea = $("#openDepartureDateArea");
+
+		this.openReturnDate = $("input#openReturnDate");
+		this.openReturnDateArea = $("#openReturnDateArea");
+
+		this.extendedMultiDestination = "T"=="F";
+		this.extraMultiRoutesArea=$("#extraMultiRoutesArea");
+		this.routesArea=$("#routesArea");
+		this.maxMultiDestinationCount=6;
+
+		this.multiRouteAreaMap=new Map();
+		this.multiDepPortMap=new Map();
+		this.multiArrPortMap=new Map();
+		this.multiDepartureDateMap=new Map();
+		this.multiCabinClassMap=new Map();
+
+		this.btnAddRouteArea=$("#btnAddRouteArea");
+		this.btnResetRouteArea=$("#btnResetRouteArea");
+
+
+		this.adult = $("select#adult");
+		this.adultArea = $("#adultArea");
+
+		this.child = $("select#child");
+		this.childArea = $("#childArea");
+
+		this.infant = $("select#infant");
+		this.infantArea = $("#infantArea");
+
+		this.student = $("select#student");
+		this.studentArea = $("#studentArea");
+
+		this.soldier = $("select#soldier");
+		this.soldierArea = $("#soldierArea");
+
+		this.discountsArea = $("#discountsArea");
+
+		this.cabinClass =  $("#cabinClass");
+		this.cabinClassArea =  $("#cabinClassArea");
+
+		this.defaultCabinClass = "";
+
+		this.currency = $("#currency");
+		this.currencyArea =  $("#currencyArea");
+        
+        this.frequentFlyerRedemption = $("#frequentFlyerRedemption");
+
+		this.actionURL = "RezvEntry.xhtml";
+
+		this.depPortList = [{"selectItems":[{"disabled":false,"label":"Antalya (AYT)","value":"AYT","escape":true,"noSelectionOption":false},{"disabled":false,"label":"Istanbul Airport (IST)","value":"IST","escape":true,"noSelectionOption":false}],"disabled":false,"label":"Turkey (Türkiye)","value":"TR","escape":false,"noSelectionOption":false},{"selectItems":[{"disabled":false,"label":"Cologne / Bonn (CGN)","value":"CGN","escape":true,"noSelectionOption":false},{"disabled":false,"label":"Dusseldorf (DUS)","value":"DUS","escape":true,"noSelectionOption":false}],"disabled":false,"label":"Germany (Deutschland)","value":"DE","escape":false,"noSelectionOption":false},{"selectItems":[{"disabled":false,"label":"Odesa (ODS)","value":"ODS","escape":true,"noSelectionOption":false}],"disabled":false,"label":"Ukraine (Україна)","value":"UA","escape":false,"noSelectionOption":false}] || {};
+		this.arrPortMatrix = {"DUS":[{"selectItems":[{"disabled":false,"label":"Antalya (AYT)","value":"AYT","escape":true,"noSelectionOption":false},{"disabled":false,"label":"Istanbul Airport (IST)","value":"IST","escape":true,"noSelectionOption":false}],"disabled":false,"label":"Turkey (Türkiye)","value":"TR","escape":false,"noSelectionOption":false}],"IST":[{"selectItems":[{"disabled":false,"label":"Antalya (AYT)","value":"AYT","escape":true,"noSelectionOption":false}],"disabled":false,"label":"Turkey (Türkiye)","value":"TR","escape":false,"noSelectionOption":false},{"selectItems":[{"disabled":false,"label":"Cologne / Bonn (CGN)","value":"CGN","escape":true,"noSelectionOption":false},{"disabled":false,"label":"Dusseldorf (DUS)","value":"DUS","escape":true,"noSelectionOption":false}],"disabled":false,"label":"Germany (Deutschland)","value":"DE","escape":false,"noSelectionOption":false},{"selectItems":[{"disabled":false,"label":"Odesa (ODS)","value":"ODS","escape":true,"noSelectionOption":false}],"disabled":false,"label":"Ukraine (Україна)","value":"UA","escape":false,"noSelectionOption":false}],"CGN":[{"selectItems":[{"disabled":false,"label":"Antalya (AYT)","value":"AYT","escape":true,"noSelectionOption":false},{"disabled":false,"label":"Istanbul Airport (IST)","value":"IST","escape":true,"noSelectionOption":false}],"disabled":false,"label":"Turkey (Türkiye)","value":"TR","escape":false,"noSelectionOption":false}],"AYT":[{"selectItems":[{"disabled":false,"label":"Istanbul Airport (IST)","value":"IST","escape":true,"noSelectionOption":false}],"disabled":false,"label":"Turkey (Türkiye)","value":"TR","escape":false,"noSelectionOption":false},{"selectItems":[{"disabled":false,"label":"Cologne / Bonn (CGN)","value":"CGN","escape":true,"noSelectionOption":false},{"disabled":false,"label":"Dusseldorf (DUS)","value":"DUS","escape":true,"noSelectionOption":false}],"disabled":false,"label":"Germany (Deutschland)","value":"DE","escape":false,"noSelectionOption":false},{"selectItems":[{"disabled":false,"label":"Odesa (ODS)","value":"ODS","escape":true,"noSelectionOption":false}],"disabled":false,"label":"Ukraine (Україна)","value":"UA","escape":false,"noSelectionOption":false}],"ODS":[{"selectItems":[{"disabled":false,"label":"Antalya (AYT)","value":"AYT","escape":true,"noSelectionOption":false},{"disabled":false,"label":"Istanbul Airport (IST)","value":"IST","escape":true,"noSelectionOption":false}],"disabled":false,"label":"Turkey (Türkiye)","value":"TR","escape":false,"noSelectionOption":false}]} || {};
+
+		this.maxPaxCount = 9 || 0;
+		this.allowedPaxCount = 9 || 0;
+
+		this.conditionalDiscountTypes = {} || [];
+
+		this.conditinalDiscountMatrix = {"CGN#AYT":[],"AYT#IST":[],"AYT#CGN":[],"IST#CGN":[],"DUS#AYT":[],"ODS#AYT":[],"IST#DUS":[],"AYT#ODS":[],"CGN#IST":[],"IST#AYT":[],"IST#ODS":[],"ODS#IST":[],"AYT#DUS":[],"DUS#IST":[]} || {};
+
+		this.dateFormat = "dd/MM/yyyy";
+
+		this.language = "en" || $("html").attr("lang");
+
+		this.digits = ["0","1","2","3","4","5","6","7","8","9"] || [];
+
+		this.cabinClassListMap =  {} || {};
+		this.currencyListMap =  {} || {};
+
+		this.flexibleSearchActive = false || false;
+		
+		this.flexibleSearch = $("input#flexibleSearch");
+		this.flexibleSearchArea = $("#flexibleSearchArea");
+		
+	};
+
+	FlightSearch.prototype.init = function(){
+
+		for (var i = 0; i < this.maxMultiDestinationCount; i++) {
+			this.multiRouteAreaMap.set('multiRouteArea_'+i,$("#multiRouteArea_"+i));
+			this.multiDepPortMap.set('multiDepPort_'+i,$("select#multiDepPort_"+i));
+			this.multiArrPortMap.set('multiArrPort_'+i,$("select#multiArrPort_"+i));
+			this.multiDepartureDateMap.set('multiDepartureDate_'+i,$("input#multiDepartureDate_"+i));
+			this.multiCabinClassMap.set('multiCabinClass_'+i,$("select#multiCabinClass_"+i));
+		}
+
+		this.selectTripType(this.tripType);
+		this.selectDepPort(this.depPort.val());
+		this.selectArrPort(this.arrPort.val());
+
+		if(this.multiDepPort.length > 0 && this.multiArrPort.length > 0){
+			this.selectMultiDepPort(this.multiDepPort.val());
+			this.selectMultiArrPort(this.multiArrPort.val());
+		}
+
+		this.selectDateFormat(this.dateFormat);
+
+		this.fillDepPorts();
+		this.fillPaxCombos();
+		this.fillCabinClass();
+		this.fillCurrency();
+
+	};
+
+	FlightSearch.prototype.addRoute = function(){
+		var show=false;
+		this.routesArea.children().each(function(e){
+			if(!show && !$(this).is(':visible')){
+				$(this).show();
+				show=true;
+			}
+		});
+		if(!show){
+			this.btnAddRouteArea.hide();
+		}else{
+			this.btnResetRouteArea.show();
+		}
+	};
+
+	FlightSearch.prototype.resetRoute = function(element){
+		this.routesArea.children().each(function(i){
+			if(i>1){
+				$(this).hide();
+			}
+		});
+		this.btnResetRouteArea.hide();
+		this.btnAddRouteArea.show();
+	};
+
+	FlightSearch.prototype.selectDateFormat = function(dateFormat){
+
+		this.dateFormat = dateFormat;
+
+		this.departureDate.attr("format", dateFormat);
+
+		this.returnDate.attr("format", dateFormat);
+
+	};
+
+	FlightSearch.prototype.fillDepPorts = function(){
+
+		var depPortList = this.depPortList;
+
+		var departurePortCombos = this.depPort.add(this.multiDepPort);
+		for(var i=0; i<this.multiDepPortMap.size; i++){
+			var value = this.multiDepPortMap.get('multiDepPort_'+i);
+			departurePortCombos=departurePortCombos.add(value);
+		}
+		departurePortCombos.each(function(){
+
+			var placeholder = $(this).attr("placeholder");
+
+			var selectMenu = $(this);
+
+			selectMenu.html("<option value=''>"+placeholder+"</option>");
+
+			$.each(depPortList, function(i, selectItem){
+				var group = selectItem.selectItems;
+				if(group){
+					var optGroup = $("<optgroup/>").prop(selectItem);
+					$.each(group, function(i, selectItem){
+						$("<option/>")
+						.prop(selectItem)
+						.text(selectItem.label)
+						.appendTo(optGroup);
+					});
+					optGroup.appendTo(selectMenu);
+				}else{
+					 $("<option/>")
+					 .prop(selectItem)
+					 .text(selectItem.label)
+					 .appendTo(selectMenu);
+				}
+			});
+
+		});
+	};
+
+	FlightSearch.prototype.fillPaxCombos = function(){
+
+		var digits = this.digits;
+
+		var paxCombos = this.adult;
+		paxCombos = paxCombos.add(this.child);
+		paxCombos = paxCombos.add(this.infant);
+		paxCombos = paxCombos.add(this.soldier);
+		paxCombos = paxCombos.add(this.student);
+
+
+		var maxPaxCount = this.maxPaxCount;
+
+		paxCombos.each(function(){
+
+			var selectMenu = $(this);
+
+			selectMenu.html("");
+
+
+			var placeholder = typeof ($(this).attr("placeholder") && $(this).attr("placeholder").length) != "undefined" ? $(this).attr("placeholder") : 0;
+
+			selectMenu.append("<option value='0'>"+placeholder+"</option>");
+
+			for(var i = 1; i <= maxPaxCount; i++){
+
+				selectMenu.append("<option value='"+i+"'>"+digits[i]+"</option>");
+
+			}
+
+		});
+	};
+
+	FlightSearch.prototype.fillCabinClass = function(){
+
+	    var flightSearch = this;
+
+	    flightSearch.isAvailable.cabinClass = !flightSearch.isNullOrEmpty(this.cabinClassListMap);
+
+
+		if (flightSearch.isAvailable.cabinClass) {
+
+			flightSearch.cabinClass.html("<option value=''>"+ flightSearch.cabinClass.attr("placeholder") +"</option>");
+
+			$.each(flightSearch.cabinClassListMap, function(key, val) {
+
+	            $("<option/>")
+	                .val(key)
+	                .text(val)
+	                .appendTo(flightSearch.cabinClass);
+
+			});
+			flightSearch.cabinClass.val(flightSearch.defaultCabinClass);
+			for(i=0; i<this.multiCabinClassMap.size; i++ ){
+				multiCabinClass = this.multiCabinClassMap.get('multiCabinClass_'+i);
+				multiCabinClass.html("<option value=''>"+ multiCabinClass.attr("placeholder") +"</option>");
+				$.each(flightSearch.cabinClassListMap, function(key, val) {
+					$("<option/>")
+						.val(key)
+						.text(val)
+						.appendTo(multiCabinClass);
+				});
+				multiCabinClass.val(flightSearch.defaultCabinClass);
+			}
+
+		}else{
+			flightSearch.cabinClassArea.remove();
+			for(i=0; i<this.multiCabinClassMap.size; i++ ){
+				$('#multiCabinClassArea_'+i).remove();
+			}
+	    }
+
+
+	};
+
+	FlightSearch.prototype.fillCurrency = function(){
+
+	    var flightSearch = this;
+
+	    flightSearch.isAvailable.currency = !flightSearch.isNullOrEmpty(this.currencyListMap);
+
+		if (flightSearch.isAvailable.currency) {
+
+			flightSearch.currency.html("<option value=''>"+ flightSearch.currency.attr("placeholder") +"</option>");
+
+			$.each(flightSearch.currencyListMap, function(key, val) {
+
+	            $("<option/>")
+	                .val(key)
+	                .text(val)
+	                .appendTo(flightSearch.currency);
+
+			});
+
+		}else{
+			flightSearch.currencyArea.remove();
+	    }
+
+
+	};
+
+	FlightSearch.prototype.selectDepPort = function(portCode){
+
+			this.depPort.val(portCode);
+			this.generateArrivalOptions(
+				this.depPort,
+				this.arrPort
+			);
+
+	};
+
+	FlightSearch.prototype.selectArrPort = function(portCode){
+
+			this.arrPort.val(portCode);
+			this.toggleConditionalDiscountSelect(
+				this.depPort,
+				this.arrPort
+			);
+
+	};
+
+	FlightSearch.prototype.selectMultiDepPort = function(portCode){
+
+			this.multiDepPort.val(portCode);
+			this.generateArrivalOptions(
+				this.multiDepPort,
+				this.multiArrPort
+			);
+
+	};
+
+	FlightSearch.prototype.selectMultiArrPort = function(portCode){
+
+			this.multiArrPort.val(portCode);
+			this.toggleConditionalDiscountSelect(
+				this.multiDepPort,
+				this.multiArrPort
+			);
+
+	};
+
+	FlightSearch.prototype.selectDepartureDate = function(date){
+
+			this.departureDate.val(date);
+
+			this.returnDate.attr("min", date);
+
+
+	};
+
+	FlightSearch.prototype.selectExtraMultiDepPort = function(element){
+
+			this.multiDepPortMap.get(element.id).val(element.value);
+			this.generateArrivalOptions(
+				this.multiDepPortMap.get(element.id),
+				this.multiArrPortMap.get(element.id.replace('Dep','Arr'))
+			);
+
+	};
+
+	FlightSearch.prototype.selectExtraMultiArrPort = function(element){
+
+			this.multiArrPortMap.get(element.id).val(element.value);
+			if (this.discountsArea.length) {
+				this.discountsArea[0].innerHTML = "";
+			};
+	};
+
+	FlightSearch.prototype.selectMultiDepartureDate = function(element){
+			this.multiDepartureDateMap.get(element.id).val(element.value);
+	};
+	FlightSearch.prototype.selectReturnDate = function(date){
+
+			this.returnDate.val(date);
+
+			this.departureDate.attr("max", date);
+
+	};
+
+	FlightSearch.prototype.selectTripType = function(tripType){
+
+			this.tripType = tripType.length == 0 ? this.tripTypeArea.find(":checked").val() : tripType;
+
+			this.tripTypeArea.find(":not([value='"+tripType+"'])").prop("checked",false);
+			this.tripTypeArea.find("[value='"+tripType+"']").prop("checked",true);
+
+			/*Hide all conditional areas*/
+
+			this.departureDateArea.hide();
+			this.returnDateArea.hide();
+			this.multiDepPortArea.hide();
+			this.multiArrPortArea.hide();
+			this.openDepartureDateArea.hide();
+			this.openReturnDateArea.hide();
+			this.extraMultiRoutesArea.hide();
+
+			/*Clean isAvailable List*/
+			this.isAvailable = {};
+
+			this.depPortArea.show();
+			this.arrPortArea.show();
+			this.cabinClassArea.show();
+
+			switch(tripType){
+
+				case "ONE_WAY":
+					this.departureDateArea.show();
+					this.isAvailable.departureDate = true;
+					break;
+
+				case "ROUND_TRIP":
+					this.departureDateArea.show();
+					this.returnDateArea.show();
+					this.isAvailable.departureDate = true;
+					this.isAvailable.returnDate = true;
+					break;
+
+				case "MULTI_DIRECTIONAL":
+					if(this.extendedMultiDestination){
+						this.depPortArea.hide();
+						this.arrPortArea.hide();
+						this.extraMultiRoutesArea.show();
+						this.cabinClassArea.hide();
+					}else{
+						this.departureDateArea.show();
+						this.returnDateArea.show();
+						this.isAvailable.departureDate = true;
+						this.isAvailable.returnDate = true;
+
+						this.multiDepPortArea.show();
+						this.isAvailable.multiDepPort = true;
+
+						this.multiArrPortArea.show();
+						this.isAvailable.multiArrPort = true;
+					}
+					break;
+
+				case "INBOUND_OPEN":
+					this.departureDateArea.show();
+					this.openReturnDateArea.show();
+					this.isAvailable.departureDate = true;
+					this.isAvailable.openReturnDate = true;
+					break;
+
+				case "OUTBOUND_OPEN":
+					this.openDepartureDateArea.show();
+					this.returnDateArea.show();
+					this.isAvailable.openDepartureDate = true;
+					this.isAvailable.returnDate = true;
+					break;
+
+			}
+
+			this.toggleConditionalDiscountSelect(
+				this.depPort,
+				this.arrPort
+			);
+
+			if(this.flexibleSearchActive && (tripType == "ONE_WAY" || tripType == "ROUND_TRIP")){				
+				this.flexibleSearchArea.show();
+			}else{
+				this.flexibleSearchArea.hide();
+			}
+	};
+
+	FlightSearch.prototype.search = function(){
+
+		if(this.check()){
+
+	    var that = this;
+
+			var formData = {};
+
+			formData.tripType = this.tripType;
+			formData.language = this.language;
+			formData.dateFormat = this.dateFormat;
+
+			formData.depPort = this.depPort.val();
+			formData.arrPort = this.arrPort.val();
+
+			formData.adult = this.adult.val();
+			formData.child = this.child.val();
+			formData.infant = this.infant.val();
+			
+			formData.prefferedCabinClass = this.cabinClass.val();
+			formData.currency = this.currency.val();
+			if(this.flexibleSearch.length){
+				formData.flexibleSearch=this.flexibleSearch[0].checked;
+			}
+            if(this.frequentFlyerRedemption.length){
+                formData.frequentFlyerRedemption = this.frequentFlyerRedemption[0].checked;
+            }
+
+			if (this.discountsArea.length && this.discountsArea[0].innerHTML != "") {
+				for (i=0; i<this.discountsArea[0].childNodes.length; i++) {
+					var id = this.discountsArea[0].childNodes[i].childNodes[1].id;
+					formData[id] = document.getElementById(id).value;
+				};
+			};
+
+			$.each(this.isAvailable, function(key, val){
+				if(val){
+					formData[key] = that[key].val();
+				}
+			});
+
+
+			if("T" == "T" ){
+				if( parseInt(this.soldier.val()) > 0 ){
+					alert("The fare of soldier is only applied for Turkish Republic Citizens who do their military services at the Turkish Republic of Northern Cyprus. A proper ID should be presented at the airport check-in. Otherwise, the difference in tax will be charged before the flight. ");
+				}
+				if(parseInt(this.student.val()) > 0 || parseInt(formData["PD-ADLT-ST"]) > 0){
+					alert("Student discount will only be applied on to/from ERCAN Direct Flights.");
+				}
+			}
+
+			
+
+			if(this.tripType == "MULTI_DIRECTIONAL" && this.extendedMultiDestination){
+				for (var count=0; count<this.multiRouteAreaMap.size; count++) {
+					var value = this.multiRouteAreaMap.get('multiRouteArea_'+count);
+					if(value.is(':visible')){
+						formData['multiDepPort_'+count]  =this.multiDepPortMap.get('multiDepPort_'+count).val();
+						formData['multiArrPort_'+count]  =this.multiArrPortMap.get('multiArrPort_'+count).val();
+						formData['multiDepartureDate_'+count]  =this.multiDepartureDateMap.get('multiDepartureDate_'+count).val();
+						var cabin =this.multiCabinClassMap.get('multiCabinClass_'+count);
+						if(cabin){
+							formData['multiCabinClass_'+count]  =cabin.val();
+						}
+					}
+				}
+			}
+			this.postData(formData, this.actionURL);
+		}
+
+	};
+
+	FlightSearch.prototype.check = function(){
+
+		var errorMessages = "";
+
+		if(this.tripType == "")
+			errorMessages += "?Please select trip type.?" + '\n';
+
+		/*---------------------Port Check---------------------*/
+		if(this.tripType == "MULTI_DIRECTIONAL" && this.extendedMultiDestination){
+			for (var count=0; count<this.multiRouteAreaMap.size; count++) {
+				var value = this.multiRouteAreaMap.get('multiRouteArea_'+count);
+				if(value.is(':visible')){
+					if(this.isNullOrEmpty(this.multiDepPortMap.get('multiDepPort_'+count).val())){
+						errorMessages += "ERROR_MULTI_DEPARTURE_PORT" + '\n';
+					}
+					if(this.isNullOrEmpty(this.multiArrPortMap.get('multiArrPort_'+count).val())){
+						errorMessages += "ERROR_MULTI_ARRIVAL_PORT" + '\n';
+					}
+					var multiDate=this.multiDepartureDateMap.get('multiDepartureDate_'+count);
+					if( this.isInvalidDate(multiDate.val()) || this.checkDateIsBeforeToday(multiDate.val())){
+						errorMessages += "ERROR_MULTI_DATE" + '\n';
+					}
+				}
+			}
+		}else {
+			if(this.isNullOrEmpty(this.depPort.val())){
+				errorMessages += "?Please select departing port?" + '\n';
+			}
+
+			if(this.isNullOrEmpty(this.arrPort.val())){
+				errorMessages += "Please select arrival port" + '\n';
+			}
+			/*---------------------Date Check----------------------*/
+
+			if( this.isInvalidDate(this.departureDate.val()) || this.checkDateIsBeforeToday(this.departureDate.val())){
+				errorMessages += "Please Select Departure Date." + '\n';
+			}
+
+			if( this.isAvailable.returnDate && this.isInvalidDate(this.returnDate.val()) ){
+				errorMessages += "Please Select Arrival Date." + '\n';
+			}
+
+			/*-----------------------------------------------------*/
+		}
+
+		if(this.isAvailable.multiDepPort && this.isNullOrEmpty(this.multiDepPort.val()))
+			errorMessages += "?Please select departing port?" + '\n';
+
+		if(this.isAvailable.multiArrPort && this.isNullOrEmpty(this.multiArrPort.val()))
+			errorMessages += "Please select arrival port" + '\n';
+
+		/*-----------------------------------------------------*/
+
+		/*---------------------Pax Check-----------------------*/
+
+		var totalAdultCount =
+	            parseInt(this.adult.val() || 0) +
+	            parseInt(this.student.val() || 0) +
+	            parseInt(this.soldier.val() || 0);
+
+		var totalChildCount = parseInt(this.child.val() || 0);
+		var totalInfantCount = parseInt(this.infant.val() || 0);
+
+		if (this.discountsArea.length) {
+			for (i=0; i<this.discountsArea[0].childNodes.length; i++) {
+				var adultExp = new RegExp("ADLT", "g");
+				var childExp = new RegExp("CHLD", "g");
+
+				if (adultExp.test(this.discountsArea[0].childNodes[i].id))
+					totalAdultCount += parseInt(this.discountsArea[0].childNodes[i].childNodes[1].value || 0);
+				else if (childExp.test(this.discountsArea[0].childNodes[i].id))
+					totalChildCount += parseInt(this.discountsArea[0].childNodes[i].childNodes[1].value || 0);
+			};
+		};
+
+		/*Infant Check*/
+		if(totalInfantCount > totalAdultCount)
+			errorMessages += "Infant Count Can Not Be Greater Than Adult Count" + '\n';
+
+		/*Child Check*/
+		if(totalAdultCount == 0 && totalChildCount > 0)
+			errorMessages += "?Alert Without parents to make the trip, please call call center.?" + '\n';
+
+		/*Minimum Pax Count Check*/
+		if( (totalAdultCount + totalChildCount) == 0 )
+			errorMessages += "At Least One Passenger Should Be Selected" + '\n';
+
+		/*Maximum Pax Count Check*/
+		if( (totalAdultCount + totalChildCount) > this.allowedPaxCount )
+			errorMessages += "Passenger Count Exceeds Max Number" + '\n';
+
+		/*-----------------------------------------------------*/
+
+		/*-------------Parametric Cabin Class Check------------*/
+
+		if(this.isNullOrEmpty(this.cabinClassList) && (false || false) && this.isNullOrEmpty(this.cabinClass.val()))
+			errorMessages += "?Please select cabin class.?" + '\n';
+
+		/*-----------------------------------------------------*/
+
+		if(false && this.isNullOrEmpty(this.currency.val()))
+			errorMessages += "?Please select currency.?" + '\n';
+
+		if(errorMessages.length > 0){
+			alert(errorMessages);
+			return false;
+		}else{
+			return true;
+		}
+
+	};
+
+	/**
+		Private functions
+
+		Warning:
+		It is not safe to call externally!
+	**/
+
+	FlightSearch.prototype.postData = function(formData, actionURL){
+
+			//Create a virtual form
+			var form = $("<form/>").prop({
+					action : actionURL,
+					method : 'post',
+					target : '_top'
+				});
+
+			//Each value is processed in here as an property of that virtual form.
+			$.each(formData, function (i, e) {
+				//Create a virtual input
+				var input = $("<input/>");
+				input.prop({
+					type : "hidden",
+					name : i
+				}).val(e);
+				//Append that input to our form
+				form.append(input);
+			});
+
+			form
+			.appendTo('body').submit().remove();
+
+
+	};
+
+	FlightSearch.prototype.generateArrivalOptions = function(departurePort, arrivalPort){
+
+		var placeholder = arrivalPort.attr("placeholder");
+
+		arrivalPort.html("<option value=''>"+placeholder+"</option>");
+
+		var destinationList = this.arrPortMatrix[departurePort.val()]
+
+		if(destinationList){
+			$.each(destinationList, function(i, selectItem){
+				var group = selectItem.selectItems;
+				if(group){
+					var optGroup = $("<optgroup/>").prop(selectItem);
+					$.each(group, function(i, selectItem){
+						$("<option/>")
+						.prop(selectItem)
+						.text(selectItem.label)
+						.appendTo(optGroup);
+					});
+					optGroup.appendTo(arrivalPort);
+				}else{
+					$("<option/>")
+					.prop(selectItem)
+					.text(selectItem.label)
+					.appendTo(arrivalPort);
+				}
+			});
+		}
+
+
+	};
+
+	FlightSearch.prototype.toggleConditionalDiscountSelectFunction = function(departurePort, arrivalPort){
+
+		/*Set both to zero*/
+		this.student.val(0);
+		this.soldier.val(0);
+
+		this.isAvailable.student = false;
+		this.isAvailable.soldier = false;
+
+		var that = this;
+
+		var studentArea = this.studentArea.hide();
+
+		var soldierArea = this.soldierArea.hide();
+
+		function generateDiscountArea(code){
+				if (document.getElementById(code) == null) {
+					var elID = code;
+					var elemDiv = document.createElement("div");
+					elemDiv.id = elID + "Area";
+					var label = document.createElement("label");
+					label.innerHTML = that.conditionalDiscountTypes[elID];
+					var select = document.createElement("select");
+					select.id = elID;
+
+					var discounts = document.getElementById("discountsArea");
+					discounts.innerHTML = "";
+					discounts.appendChild(elemDiv);
+					document.getElementById(elID + "Area").appendChild(label)
+					document.getElementById(elID + "Area").appendChild(select);
+
+					var selectMenu = document.getElementById(elID);
+
+
+
+					var option = document.createElement("option");
+					option.value = 0;
+					option.innerHTML = that.conditionalDiscountTypes[elID];
+					selectMenu.appendChild(option);
+
+					var digits = new FlightSearch;
+					for(var i = 1; i <= digits.digits.length - 1; i++){
+						var option = document.createElement("option");
+						option.value = digits.digits[i];
+						option.innerHTML = digits.digits[i];
+						selectMenu.appendChild(option);
+
+					};
+
+					discounts.style.display = "block";
+				};
+		}
+		if('F' != 'T'){
+				var eligiblePassengerTypeList = this.conditinalDiscountMatrix[departurePort.val() + '#' + arrivalPort.val()];
+
+				var tripExp = new RegExp("ROUND", "g");
+				if (tripExp.test(this.tripType) && eligiblePassengerTypeList) {
+					eligiblePassengerTypeList = eligiblePassengerTypeList.concat(this.conditinalDiscountMatrix[arrivalPort.val() + '#' + departurePort.val()]);
+				}
+
+				if(eligiblePassengerTypeList){
+					$.each(eligiblePassengerTypeList, function(index, code){
+						switch(code){
+							case "STDT":
+								that.isAvailable.student = true;
+								studentArea.show();
+								break;
+							case "SLDR":
+								that.isAvailable.soldier = true;
+								soldierArea.show();
+								break;
+							default:
+								generateDiscountArea(code);
+								break;
+
+						};
+
+				});
+			}
+		}
+	};
+
+	FlightSearch.prototype.toggleConditionalDiscountSelect = function(departurePort, arrivalPort){
+
+			if (this.discountsArea.length) {
+				this.discountsArea[0].innerHTML = "";
+			};
+
+			this.toggleConditionalDiscountSelectFunction(departurePort, arrivalPort);
+	};
+
+	FlightSearch.prototype.isNullOrEmpty = function(value){
+
+		return (value == null || value == ""); //  || !(Object.keys(value).length)
+
+	};
+
+	FlightSearch.prototype.isInvalidDate = function(dateString){
+
+		return (dateString == null || dateString == "");
+
+	};
+
+	FlightSearch.prototype.checkDateIsBeforeToday = function(dateString){
+
+		return false;
+	};
+
+	global.FlightSearch = FlightSearch; //Put FlightSearch API prototype into global object
+
+}(jQuery, window)); //Assign jQuery as $, window as global in this scope. To be extended for other frameworks

@@ -1,0 +1,188 @@
+﻿jQuery(document).ready( function() {
+	
+	// <NewTopMenu>
+	
+	var topMenuContentTitle;
+	var topMenuContentImage;
+	var topMenuContentSummary;
+	var topMenuContentTrigger = jQuery(".headerMenu a");
+	var topMenuContent;
+	
+	var sectionDetail = jQuery("#sectionDetail");
+	var sectionDetailTitle = jQuery("#sectionDetailTitle");
+	var sectionDetailImage = jQuery("#sectionDetailImage");
+	var sectionDetailSummary = jQuery("#sectionDetailSummary");
+	
+	var topMenuLevel1Nav = jQuery(".headerMenu li.level0 > a");
+	var topMenuLevel1Content = jQuery(".headerMenu li.level0.subMenu");
+	var topMenuLevel1TimeOut;
+	var topMenuLevel1LeaveTime = 10;
+	var topMenuLevel1ContentTemp;
+	
+	var topMenuLevel2Nav = jQuery(".headerMenu li.level1 > a");
+	var topMenuLevel2Content = jQuery(".headerMenu li.level1.subMenu");
+	var topMenuLevel2TimeOut;
+	var topMenuLevel2LeaveTime = 10;
+	var topMenuLevel2ContentTemp;
+	
+	var sectionDetailHeight;
+	var topMenuLevel2ContentHeight;
+	
+	topMenuLevel1Nav.mouseenter( function() {
+		
+		jQuery(".headerMenu li.menu86 a.Menu_105").attr("href", "#");
+		jQuery(".headerMenu li.menu88 a.Menu_123").attr("href", "#");
+		jQuery(".headerMenu li.menu89 a.Menu_137").attr("href", "#");
+		jQuery(".headerMenu li.menu90 a.Menu_141").attr("href", "#");
+		jQuery(".headerMenu li.menu675 a.Menu_675").attr("href", "#");
+		
+		clearTimeout(topMenuLevel1TimeOut);
+		
+		topMenuLevel1ContentTemp = jQuery(this).parent().next();
+		
+		if ( topMenuLevel1ContentTemp.hasClass("subMenu") )
+		{
+			topMenuLevel1Content.css("display","none");
+			topMenuLevel1ContentTemp.css("display","block");
+			topMenuLevel1Nav.removeClass("hover");
+			jQuery(this).addClass("hover");
+		}
+		else
+		{
+			topMenuLevel1Nav.removeClass("hover");
+			topMenuLevel1Content.css("display","none");
+		}
+		
+		sectionDetail.removeClass();
+		sectionDetail.addClass("oneLevel");
+		topMenuLevel2Content.css("display","none");
+		
+		
+		
+	});
+	
+	topMenuLevel1Nav.mouseleave( function() {
+		
+		topMenuLevel1TimeOut = setTimeout( function() {
+			
+			topMenuLevel1Content.css("display","none");
+			topMenuLevel1Nav.removeClass("hover");
+			sectionDetail.css("display","none");
+				
+			
+		}, topMenuLevel1LeaveTime);
+		
+	});
+	
+	topMenuLevel1Content.mouseenter( function() {
+		
+		clearTimeout(topMenuLevel1TimeOut);
+		
+		
+	});
+	
+	topMenuLevel1Content.mouseleave( function() {
+		
+		topMenuLevel1TimeOut = setTimeout( function() {
+			
+			topMenuLevel1Content.css("display","none");
+			topMenuLevel1Nav.removeClass("hover");
+			sectionDetail.css("display","none");
+				
+			
+		}, topMenuLevel1LeaveTime);
+		
+	});
+	
+	topMenuLevel2Nav.mouseenter( function() {
+		
+		clearTimeout(topMenuLevel2TimeOut);
+		
+		topMenuLevel2ContentTemp = jQuery(this).parent().next();
+		
+		if ( topMenuLevel2ContentTemp.hasClass("subMenu") )
+		{
+			topMenuLevel2Content.css("display","none");
+			topMenuLevel2ContentTemp.css("display","block");
+			topMenuLevel2Nav.removeClass("hover");
+			sectionDetail.removeClass("oneLevel");
+			jQuery(this).addClass("hover");
+		}
+		else
+		{
+			topMenuLevel2Nav.removeClass("hover");
+			sectionDetail.addClass("oneLevel");
+			topMenuLevel2Content.css("display","none");
+		}
+		
+	});
+	
+	topMenuContentTrigger.mouseenter( function() {
+		
+		topMenuContent = jQuery(this).next();
+		
+		topMenuContentTitle = topMenuContent.children(".sectionDetailTitle").html();
+		topMenuContentImage = topMenuContent.children(".sectionDetailImage").html();
+		topMenuContentSummary = topMenuContent.children(".sectionDetailSummary").html();
+		
+		sectionDetailTitle.html(topMenuContentTitle);
+		sectionDetailImage.html(topMenuContentImage);
+		sectionDetailSummary.html(topMenuContentSummary);
+		
+		sectionDetail.css("display","block");
+		
+		if (jQuery(this).parent(".level0").length > 0)
+		{
+			if (jQuery(this).parent(".level0").next(".subMenu").length < 1)
+			{
+				sectionDetail.css("display","none");
+			}
+		}
+		
+		heightControl(jQuery(this));
+		
+		
+		
+	});
+	
+	function heightControl( jQueryItem )
+	{
+		jQueryItemParent = jQuery(jQueryItem).parent();
+		
+		if ( jQueryItemParent.hasClass("level0") )
+		{
+			jQueryItemParent = jQueryItemParent.next(".subMenu");
+		}
+		else
+		{
+			jQueryItemParent = jQueryItemParent.parents("li.subMenu.level0");
+		}
+		
+		if ( jQuery(jQueryItem).parent().hasClass("level1") )
+		{
+			topMenuLevel2ContentHeight = jQuery(jQueryItem).parent().next().outerHeight(true);
+		}
+		else
+		{
+			topMenuLevel2ContentHeight = 0;
+		}
+		
+		sectionDetailHeight = sectionDetail.outerHeight(true);
+		
+		if ( jQueryItemParent.height() < sectionDetailHeight || jQueryItemParent.height() < topMenuLevel2ContentHeight )
+		{
+			if ( sectionDetailHeight < topMenuLevel2ContentHeight )
+			{
+				jQueryItemParent.css("height",topMenuLevel2ContentHeight);
+			}
+			else
+			{
+				jQueryItemParent.css("height",sectionDetailHeight);
+			}
+		}
+		
+	}
+	
+	// </NewTopMenu>
+	
+});
